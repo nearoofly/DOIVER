@@ -1,1 +1,111 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modification de la Voix</title>
+
+    <!-- Inclure Tone.js depuis le CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/tone@14"></script>
+
+    <style>
+        body {
+            background: url('gif.gif') no-repeat center center fixed;
+            background-size: cover;
+            color: #FFA500; /* Orange */
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 50px;
+        }
+
+        h1 {
+            font-size: 2em;
+            letter-spacing: 4px;
+        }
+
+        input[type="file"] {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #333;
+            color: #FFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        audio {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        #downloadButton {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4CAF50; /* Vert */
+            color: #FFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none; /* Masquer le bouton par défaut */
+        }
+    </style>
+</head>
+<body>
+    <h1>Modification de la Voix (Basse)</h1>
+
+    <input type="file" id="audioInput" accept="audio/*">
+    <audio id="audio" controls>
+        <source id="audioSource" type="audio/mp3">
+        Votre navigateur ne prend pas en charge l'élément audio.
+    </audio>
+
+    <button id="downloadButton" onclick="downloadAudio()">Télécharger l'Audio Modifié</button>
+  <a href="about.html"><button>En savoir plus</button></a>
+    <script>
+        var audioInput = document.getElementById("audioInput");
+        var audio = document.getElementById("audio");
+        var audioSource = document.getElementById("audioSource");
+        var downloadButton = document.getElementById("downloadButton");
+
+        audioInput.addEventListener("change", function (event) {
+            var file = event.target.files[0];
+            var objectURL = URL.createObjectURL(file);
+            
+            audioSource.src = objectURL;
+            audio.load();
+        });
+
+        // Utilisation de Tone.js pour ajouter une basse à l'audio
+        var player = new Tone.Player().toDestination();
+
+        audio.addEventListener("play", function () {
+            player.load(audioSource.src, function () {
+                player.start();
+            });
+        });
+
+        audio.addEventListener("pause", function () {
+            player.stop();
+            showDownloadButton(); // Afficher le bouton de téléchargement une fois l'audio modifié
+        });
+
+        function showDownloadButton() {
+            downloadButton.style.display = "block"; // Afficher le bouton de téléchargement
+        }
+
+        function downloadAudio() {
+            var modifiedAudioBlob = new Blob([player.buffer.toArray()], { type: "audio/wav" });
+            var url = URL.createObjectURL(modifiedAudioBlob);
+
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "audio_modifie.wav";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
