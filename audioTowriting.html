@@ -48,14 +48,6 @@
             
         }
 
-
-
-
-
-
-
-
-
         /* styles.css */
 
 /* Style de la zone de contenu principale */
@@ -107,6 +99,12 @@ a:hover {
     <textarea id="textToSpeak" rows="4" cols="50">Entrez votre texte ici...</textarea>
     <button onclick="synthesizeSpeech()">Générer et Télécharger l'Audio MP3</button>
 
+    <!-- Ajout d'un élément audio pour la lecture -->
+    <audio controls id="audioPlayer" style="display: none;"></audio>
+
+    <!-- Ajout d'un bouton de téléchargement -->
+    <a id="downloadLink" style="display: none;">Télécharger l'Audio</a>
+
     <script>
         function synthesizeSpeech() {
             var text = document.getElementById("textToSpeak").value;
@@ -128,14 +126,17 @@ a:hover {
             utterance.onend = function () {
                 var blob = new Blob(audioChunks, { type: 'audio/mpeg' });
                 var url = URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = 'speech.mp3';
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
+
+                // Mise à jour de la source de l'élément audio
+                var audioPlayer = document.getElementById("audioPlayer");
+                audioPlayer.src = url;
+
+                // Affichage de l'élément audio et du bouton de téléchargement
+                audioPlayer.style.display = 'block';
+                var downloadLink = document.getElementById("downloadLink");
+                downloadLink.style.display = 'block';
+                downloadLink.href = url;
+                downloadLink.download = 'speech.mp3';
             };
 
             utterance.onaudioprocess = function (event) {
