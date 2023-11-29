@@ -96,12 +96,12 @@
         }
 
         function downloadAudio() {
-            var modifiedAudioBlob = new Blob([player.buffer.toArray()], { type: "audio/wav" });
+            var modifiedAudioBlob = new Blob([player.buffer.toArray()], { type: "audio/mp3" });
             var url = URL.createObjectURL(modifiedAudioBlob);
 
             var a = document.createElement("a");
             a.href = url;
-            a.download = "audio_modifie.wav";
+            a.download = "audio_modifie.mp3";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
