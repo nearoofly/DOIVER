@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générer un Fichier Audio MP3 à partir du Texte</title>
+  
+    <style>
+        body {
+            background: url('gif.gif') no-repeat center center fixed;
+            background-size: cover;
+            color: #FFA500; /* Orange */
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 50px;
+        }
+
+        h1 {
+            font-size: 2em;
+            letter-spacing: 4px;
+        }
+
+        input[type="file"] {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #333;
+            color: #FFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        audio {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        #downloadButton {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4CAF50; /* Vert */
+            color: #FFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none; /* Masquer le bouton par défaut */
+        }
+    </style>
+</head>
+<body>
+    <textarea id="textToSpeak" rows="4" cols="50">Entrez votre texte ici...</textarea>
+    <button onclick="synthesizeSpeech()">Générer et Télécharger l'Audio MP3</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/say.js"></script>
+    <script>
+        function synthesizeSpeech() {
+            var text = document.getElementById("textToSpeak").value;
+
+            // Utilisation de say.js pour synthétiser la voix en MP3
+            var speech = new Say({
+                text: text,
+                voice: 'Google UK English Female', // Choisir la voix souhaitée
+                volume: 100,
+                speed: 100,
+                pitch: 100
+            });
+
+            // Génération de l'audio et téléchargement au format MP3
+            speech.export('blob').then(function (blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'speech.mp3';
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            });
+        }
+    </script>
+</body>
+</html>
