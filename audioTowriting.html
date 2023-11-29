@@ -118,7 +118,21 @@
             };
 
             utterance.onaudioprocess = function (event) {
-                audioChunks.push(event.inputBuffer.getChannelData(0));
+                var float32Buffer = event.inputBuffer.getChannelData(0);
+                var int16Buffer = new Int16Array(float32Buffer.length);
+
+                for (var i = 0; i < float32Buffer.length; i++) {
+                    int16Buffer[i] = float32Buffer[i] * 0x7FFF; // PCM audio data is signed 16-bit
+                }
+
+                var buffer = new ArrayBuffer(int16Buffer.length * 2);
+                var view = new DataView(buffer);
+
+                int16Buffer.forEach(function (value, index) {
+                    view.setInt16(index * 2, value, true);
+                });
+
+                audioChunks.push(view);
             };
 
             synth.speak(utterance);
