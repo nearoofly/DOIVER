@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+      <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modification de la Voix</title>
-    <script src="https://cdn.jsdelivr.net/npm/tone@14"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@latest"></script>
      <style>
         body {
             font-family: Arial, sans-serif;
@@ -64,32 +64,35 @@
         Votre navigateur ne prend pas en charge l'élément audio.
     </audio>
 
-    <script src="pitch-shift.js"></script>
     <script>
         var audioInput = document.getElementById("audioInput");
         var audio = document.getElementById("audio");
         var audioSource = document.getElementById("audioSource");
+        var player = new Tone.Player().toDestination(); // Création d'un lecteur audio Tone.js
 
         audioInput.addEventListener("change", function (event) {
             var file = event.target.files[0];
-            var objectURL = URL.createObjectURL(file);
-            
-            audioSource.src = objectURL;
-            audio.load();
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var audioBuffer = new Tone.Buffer(e.target.result, function () {
+                    player.buffer = audioBuffer;
+                    audioSource.src = URL.createObjectURL(file);
+                    audio.load();
+                });
+            };
+
+            reader.readAsArrayBuffer(file);
         });
 
-        var pitchShift = new PitchShift(
-            audioContext = new (window.AudioContext || window.webkitAudioContext)(),
-            audioContext.destination
-        );
+        // Fonction pour changer la hauteur de ton avec Tone.js
+        function changePitch(shiftValue) {
+            player.playbackRate = Math.pow(2, shiftValue / 12);
+        }
 
-        audio.addEventListener("play", function () {
-            pitchShift.process(audio);
-        });
-
-        audio.addEventListener("pause", function () {
-            pitchShift.reset();
-        });
+        // Exemple pour changer la hauteur d'un ton vers le haut
+        var pitchShiftValue = 1; // Modifier cette valeur pour changer la hauteur
+        changePitch(pitchShiftValue);
     </script>
 </body>
 </html>
