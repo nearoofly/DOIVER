@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Inclure la bibliothèque audiobuffer-to-mp3 -->
+<script src="https://cdn.jsdelivr.net/npm/audiobuffer-to-mp3@2.0.3/dist/mp3-buffer.min.js"></script>
+
     <title>Modification de la Voix</title>
 
     <!-- Inclure Tone.js depuis le CDN -->
@@ -113,8 +116,24 @@
             a.click();
             document.body.removeChild(a);
         }
+        function downloadAudio() {
+    // Convertir l'audio en buffer MP3
+    const mp3encoder = new MP3BufferEncoder();
+    const audioBuffer = player.buffer._buffer;
+    
+    mp3encoder.encode(audioBuffer).then(function(mp3Data) {
+        const blob = new Blob([mp3Data], { type: 'audio/mp3' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'audio_modifie.mp3';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+}
+
     </script>
-      <!-- Inclure la bibliothèque audiobuffer-to-mp3 -->
-<script src="https://cdn.jsdelivr.net/npm/audiobuffer-to-mp3@2.0.3/dist/mp3-buffer.min.js"></script>
 </body>
 </html>
