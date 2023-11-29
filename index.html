@@ -60,6 +60,7 @@
     <button id="downloadButton" onclick="downloadAudio()">Télécharger l'Audio Modifié</button>
 
     <script src="https://cdn.jsdelivr.net/npm/tone@14"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mp3-buffer-encoder@1.0.0/dist/mp3-buffer-encoder.min.js"></script>
     <script>
         var audioInput = document.getElementById("audioInput");
         var audio = document.getElementById("audio");
@@ -88,30 +89,28 @@
             player.stop();
             showDownloadButton();
         });
-        
-        function downloadAudio() {
-    // Convertir l'audio en buffer MP3
-    const mp3encoder = new MP3BufferEncoder();
-    const audioBuffer = player.buffer._buffer;
-    
-    mp3encoder.encode(audioBuffer).then(function(mp3Data) {
-        const blob = new Blob([mp3Data], { type: 'audio/mp3' });
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'audio_modifie.mp3';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
 
         function showDownloadButton() {
             downloadButton.style.display = "block"; // Afficher le bouton de téléchargement
         }
-        
-    });
-}
-       
+
+        function downloadAudio() {
+            // Convertir l'audio en buffer MP3
+            const mp3encoder = new MP3BufferEncoder();
+            const audioBuffer = player.buffer._buffer;
+
+            mp3encoder.encode(audioBuffer).then(function(mp3Data) {
+                const blob = new Blob([mp3Data], { type: 'audio/mp3' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'audio_modifie.mp3';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
     </script>
 </body>
 </html>
