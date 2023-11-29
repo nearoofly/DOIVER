@@ -64,6 +64,11 @@
     <button id="downloadButton" onclick="downloadAudio()">Télécharger l'Audio Modifié</button>
   <a href="doiver.html"><button>En savoir plus</button></a>
     <script>
+        // Votre code JavaScript mis à jour
+
+        // Initialisation du contexte audio Tone.js
+        Tone.start();
+
         var audioInput = document.getElementById("audioInput");
         var audio = document.getElementById("audio");
         var audioSource = document.getElementById("audioSource");
@@ -77,26 +82,28 @@
             audio.load();
         });
 
-        // Utilisation de Tone.js pour ajouter une basse à l'audio
         var player = new Tone.Player().toDestination();
 
         audio.addEventListener("play", function () {
-            player.load(audioSource.src, function () {
+            // Charger le fichier audio dans Tone.js
+            Tone.Buffer.from(audioSource.src, function(buffer){
+                player.buffer = buffer;
                 player.start();
             });
         });
 
         audio.addEventListener("pause", function () {
             player.stop();
-            showDownloadButton(); // Afficher le bouton de téléchargement une fois l'audio modifié
+            showDownloadButton();
         });
 
         function showDownloadButton() {
-            downloadButton.style.display = "block"; // Afficher le bouton de téléchargement
+            downloadButton.style.display = "block";
         }
 
         function downloadAudio() {
-            var modifiedAudioBlob = new Blob([player.buffer.toArray()], { type: "audio/mp3" });
+            // Utiliser _buffer pour accéder aux données audio
+            var modifiedAudioBlob = new Blob([player.buffer._buffer.getChannelData(0)], { type: "audio/mp3" });
             var url = URL.createObjectURL(modifiedAudioBlob);
 
             var a = document.createElement("a");
