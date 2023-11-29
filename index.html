@@ -100,23 +100,7 @@
             showDownloadButton();
         });
 
-        function showDownloadButton() {
-            downloadButton.style.display = "block";
-        }
-
-        function downloadAudio() {
-            // Utiliser _buffer pour accéder aux données audio
-            var modifiedAudioBlob = new Blob([player.buffer._buffer.getChannelData(0)], { type: "audio/mp3" });
-            var url = URL.createObjectURL(modifiedAudioBlob);
-
-            var a = document.createElement("a");
-            a.href = url;
-            a.download = "audio_modifie.mp3";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-        function downloadAudio() {
+      function downloadAudio() {
     // Convertir l'audio en buffer MP3
     const mp3encoder = new MP3BufferEncoder();
     const audioBuffer = player.buffer._buffer;
