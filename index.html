@@ -1,35 +1,31 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Inclure la bibliothèque audiobuffer-to-mp3 -->
-<script src="https://cdn.jsdelivr.net/npm/audiobuffer-to-mp3@2.0.3/dist/mp3-buffer.min.js"></script>
-
     <title>Modification de la Voix</title>
-
-    <!-- Inclure Tone.js depuis le CDN -->
     <script src="https://cdn.jsdelivr.net/npm/tone@14"></script>
-
-    <style>
+     <style>
         body {
-            background: url('gif.gif') no-repeat center center fixed;
-            background-size: cover;
-            color: #FFA500; /* Orange */
-            font-family: 'Arial', sans-serif;
-            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             margin: 0;
-            padding: 50px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
 
         h1 {
             font-size: 2em;
-            letter-spacing: 4px;
+            color: #333;
+            margin-bottom: 20px;
         }
 
         input[type="file"] {
-            margin-top: 20px;
+            margin-bottom: 20px;
             padding: 10px;
             background-color: #333;
             color: #FFF;
@@ -39,19 +35,23 @@
         }
 
         audio {
-            margin-top: 20px;
+            margin-bottom: 20px;
             width: 100%;
+            max-width: 300px;
         }
 
-        #downloadButton {
-            margin-top: 20px;
+        #downloadButton, button {
             padding: 10px;
-            background-color: #4CAF50; /* Vert */
+            background-color: #4CAF50;
             color: #FFF;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            display: none; /* Masquer le bouton par défaut */
+            display: none;
+        }
+
+        button {
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -64,19 +64,16 @@
         Votre navigateur ne prend pas en charge l'élément audio.
     </audio>
 
-   <button id="downloadButton" onclick="downloadAudio()">Télécharger l'Audio Modifié en MP3</button>
+    <button id="downloadButton" onclick="downloadAudio()">Télécharger l'Audio Modifié en MP3</button>
 
-  <a href="doiver.html"><button>En savoir plus</button></a>
+    <a href="doiver.html"><button>En savoir plus</button></a>
+
     <script>
-        // Votre code JavaScript mis à jour
-
-        // Initialisation du contexte audio Tone.js
-        Tone.start();
-
         var audioInput = document.getElementById("audioInput");
         var audio = document.getElementById("audio");
         var audioSource = document.getElementById("audioSource");
         var downloadButton = document.getElementById("downloadButton");
+        var mediaRecorder; 
 
         audioInput.addEventListener("change", function (event) {
             var file = event.target.files[0];
@@ -89,7 +86,6 @@
         var player = new Tone.Player().toDestination();
 
         audio.addEventListener("play", function () {
-            // Charger le fichier audio dans Tone.js
             Tone.Buffer.from(audioSource.src, function(buffer){
                 player.buffer = buffer;
                 player.start();
@@ -101,24 +97,42 @@
             showDownloadButton();
         });
 
-      function downloadAudio() {
-    // Convertir l'audio en buffer MP3
-    const mp3encoder = new MP3BufferEncoder();
-    const audioBuffer = player.buffer._buffer;
-    
-    mp3encoder.encode(audioBuffer).then(function(mp3Data) {
-        const blob = new Blob([mp3Data], { type: 'audio/mp3' });
-        const url = URL.createObjectURL(blob);
+        function showDownloadButton() {
+            downloadButton.style.display = "block";
+        }
 
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'audio_modifie.mp3';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    });
-}
+        function downloadAudio() {
+            var mediaStream = new MediaStream([player.buffer.toDestination().toMaster()._context.destination.stream]); 
+            mediaRecorder = new MediaRecorder(mediaStream, {
+                mimeType: 'audio/mp3'
+            });
 
+            const chunks = [];
+            mediaRecorder.ondataavailable = function(event) {
+                chunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = function() {
+                const blob = new Blob(chunks, {
+                    type: 'audio/mp3'
+                });
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'audio_modifie.mp3';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            mediaRecorder.start();
+            
+            // Arrêtez l'enregistrement après 10 secondes, ajustez selon vos besoins
+            setTimeout(() => {
+                mediaRecorder.stop();
+            }, 10000); // 10 secondes d'enregistrement
+        }
     </script>
 </body>
 </html>
