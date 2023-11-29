@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modification de la Voix</title>
+
+<script src="https://cdn.jsdelivr.net/npm/tone@14"></script>
+
+    <style>
+        body {
+            background: url('gifed/gif.gif') no-repeat center center fixed;
+            background-size: cover;
+            color: #FFA500; /* Orange */
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 50px;
+        }
+
+        h1 {
+            font-size: 2em;
+            letter-spacing: 4px;
+        }
+
+        input[type="file"] {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #333;
+            color: #FFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        audio {
+            margin-top: 20px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Modification de la Voix (Basse)</h1>
+
+    <input type="file" id="audioInput" accept="audio/*">
+    <audio id="audio" controls>
+        <source id="audioSource" type="audio/mp3">
+        Votre navigateur ne prend pas en charge l'élément audio.
+    </audio>
+
+    <script src="pitch-shift.js"></script>
+    <script>
+        var audioInput = document.getElementById("audioInput");
+        var audio = document.getElementById("audio");
+        var audioSource = document.getElementById("audioSource");
+
+        audioInput.addEventListener("change", function (event) {
+            var file = event.target.files[0];
+            var objectURL = URL.createObjectURL(file);
+            
+            audioSource.src = objectURL;
+            audio.load();
+        });
+
+        var pitchShift = new PitchShift(
+            audioContext = new (window.AudioContext || window.webkitAudioContext)(),
+            audioContext.destination
+        );
+
+        audio.addEventListener("play", function () {
+            pitchShift.process(audio);
+        });
+
+        audio.addEventListener("pause", function () {
+            pitchShift.reset();
+        });
+    </script>
+</body>
+</html>
