@@ -97,47 +97,31 @@
             var synth = window.speechSynthesis;
             synth.cancel(); // Annuler les éventuelles synthèses en cours
 
-            synth.speak(utterance);
+            var audioChunks = [];
+            utterance.onstart = function () {
+                audioChunks = [];
+            };
 
             utterance.onend = function () {
-                var blob = new Blob([new Uint8Array()], { type: 'audio/mpeg' });
+                var blob = new Blob(audioChunks, { type: 'audio/mpeg' });
                 var url = URL.createObjectURL(blob);
 
-                synth.cancel(); // Arrêter la synthèse
+                var audioPlayer = document.getElementById("audioPlayer");
+                audioPlayer.src = url;
+                audioPlayer.style.display = 'block';
 
-                synth.onvoiceschanged = function () {
-                    var voices = synth.getVoices();
-                    var utterance = new SpeechSynthesisUtterance(text);
-                    utterance.voice = voices.find(v => v.lang === 'fr-FR');
-                    synth.speak(utterance);
-
-                    var audioChunks = [];
-                    utterance.onpause = function () {
-                        audioChunks.push(audioCtx.createBuffer(audioChunks[0].length, audioChunks[0][0].length, audioCtx.sampleRate));
-
-                        for (var i = 0; i < audioChunks[0].length; ++i) {
-                            audioChunks[0][i] = audioChunks[0][i][0];
-                        }
-
-                        audioChunks = audioChunks[0];
-                        var blob = new Blob([audioChunks], { type: 'audio/mpeg' });
-                        var url = URL.createObjectURL(blob);
-
-                        var audioPlayer = document.getElementById("audioPlayer");
-                        audioPlayer.src = url;
-                        audioPlayer.style.display = 'block';
-
-                        var downloadLink = document.getElementById("downloadLink");
-                        downloadLink.style.display = 'block';
-                        downloadLink.href = url;
-                        downloadLink.download = 'speech.mp3';
-                    };
-
-                    utterance.onend = function () {
-                        synth.cancel(); // Arrêter la synthèse
-                    };
-                };
+                var downloadLink = document.getElementById("downloadLink");
+                downloadLink.style.display = 'block';
+                downloadLink.href = url;
+                downloadLink.setAttribute('download', 'speech.mp3');
+                downloadLink.innerHTML = 'Télécharger l\'Audio';
             };
+
+            utterance.onaudioprocess = function (event) {
+                audioChunks.push(event.inputBuffer.getChannelData(0));
+            };
+
+            synth.speak(utterance);
         }
     </script>
 </body>
