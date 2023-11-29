@@ -106,10 +106,12 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = 'audio_modifie.mp3';
+                a.style.display = 'none';
                 document.body.appendChild(a);
                 a.click();
+                window.URL.revokeObjectURL(url); // Libérer l'URL de l'objet Blob.
                 document.body.removeChild(a);
-
+                
                 showDownloadButton(); // Appel de la fonction pour afficher le bouton après le traitement
             });
         }
