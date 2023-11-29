@@ -31,100 +31,112 @@
             cursor: pointer;
         }
 
+        /* Style de la zone de contenu principale */
+        .container {
+            width: 60%;
+            margin: 0 auto;
+            text-align: center;
+            background-color: #f7f7f7;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        }
 
-        /* styles.css */
+        /* Style des titres */
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
 
-/* Style de la zone de contenu principale */
-.container {
-    width: 60%;
-    margin: 0 auto;
-    text-align: center;
-    background-color: #f7f7f7;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
-}
+        p {
+            color: #555;
+            margin-bottom: 30px;
+        }
 
-/* Style des titres */
-h1 {
-    color: #333;
-    margin-bottom: 20px;
-}
+        /* Style des zones de texte */
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-p {
-    color: #555;
-    margin-bottom: 30px;
-}
+        /* Style des liens */
+        a {
+            display: block;
+            margin-bottom: 10px;
+            color: blue;
+            text-decoration: none;
+        }
 
-/* Style des zones de texte */
-textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-/* Style des liens */
-a {
-    display: block;
-    margin-bottom: 10px;
-    color: blue;
-    text-decoration: none;
-}
-
-a:hover {
-    color: #0066cc;
-}
-
+        a:hover {
+            color: #0066cc;
+        }
     </style>
 </head>
 <body>
-    <textarea id="textToSpeak" rows="4" cols="50">Entrez votre texte ici...</textarea>
-    <button onclick="synthesizeSpeech()">Générer et Télécharger l'Audio MP3</button>
+    <div class="container">
+        <h1>Générer un Fichier Audio MP3 à partir du Texte</h1>
+        <textarea id="textToSpeak" rows="4" cols="50">Entrez votre texte ici...</textarea>
+        <button onclick="synthesizeSpeech()">Générer et Télécharger l'Audio MP3</button>
 
-    <!-- Ajout d'un élément audio pour la lecture -->
-    <audio controls id="audioPlayer" style="display: none;"></audio>
+        <!-- Ajout d'un élément audio pour la lecture -->
+        <audio controls id="audioPlayer" style="display: none;"></audio>
 
-    <!-- Ajout d'un bouton de téléchargement -->
-    <a id="downloadLink" style="display: none;">Télécharger l'Audio</a>
+        <!-- Ajout d'un bouton de téléchargement -->
+        <a id="downloadLink" style="display: none;">Télécharger l'Audio</a>
+    </div>
 
     <script>
         function synthesizeSpeech() {
             var text = document.getElementById("textToSpeak").value;
-
             var utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'fr-FR'; // Choisir la langue souhaitée
-            utterance.volume = 1; // Volume (de 0 à 1)
-            utterance.rate = 1; // Vitesse de parole (de 0.1 à 10)
-            utterance.pitch = 1; // Hauteur de la voix (de 0 à 2)
 
             var synth = window.speechSynthesis;
-
-            // Génération de l'audio et téléchargement au format MP3
-            var audioChunks = [];
             synth.cancel(); // Annuler les éventuelles synthèses en cours
 
             synth.speak(utterance);
 
             utterance.onend = function () {
-                var blob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                var blob = new Blob([new Uint8Array()], { type: 'audio/mpeg' });
                 var url = URL.createObjectURL(blob);
 
-                // Mise à jour de la source de l'élément audio
-                var audioPlayer = document.getElementById("audioPlayer");
-                audioPlayer.src = url;
+                synth.cancel(); // Arrêter la synthèse
 
-                // Affichage de l'élément audio et du bouton de téléchargement
-                audioPlayer.style.display = 'block';
-                var downloadLink = document.getElementById("downloadLink");
-                downloadLink.style.display = 'block';
-                downloadLink.href = url;
-                downloadLink.download = 'speech.mp3';
-            };
+                synth.onvoiceschanged = function () {
+                    var voices = synth.getVoices();
+                    var utterance = new SpeechSynthesisUtterance(text);
+                    utterance.voice = voices.find(v => v.lang === 'fr-FR');
+                    synth.speak(utterance);
 
-            utterance.onaudioprocess = function (event) {
-                audioChunks.push(event.inputBuffer.getChannelData(0));
+                    var audioChunks = [];
+                    utterance.onpause = function () {
+                        audioChunks.push(audioCtx.createBuffer(audioChunks[0].length, audioChunks[0][0].length, audioCtx.sampleRate));
+
+                        for (var i = 0; i < audioChunks[0].length; ++i) {
+                            audioChunks[0][i] = audioChunks[0][i][0];
+                        }
+
+                        audioChunks = audioChunks[0];
+                        var blob = new Blob([audioChunks], { type: 'audio/mpeg' });
+                        var url = URL.createObjectURL(blob);
+
+                        var audioPlayer = document.getElementById("audioPlayer");
+                        audioPlayer.src = url;
+                        audioPlayer.style.display = 'block';
+
+                        var downloadLink = document.getElementById("downloadLink");
+                        downloadLink.style.display = 'block';
+                        downloadLink.href = url;
+                        downloadLink.download = 'speech.mp3';
+                    };
+
+                    utterance.onend = function () {
+                        synth.cancel(); // Arrêter la synthèse
+                    };
+                };
             };
         }
     </script>
