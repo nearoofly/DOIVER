@@ -1,31 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-      <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modification de la Voix</title>
-    <script src="https://cdn.jsdelivr.net/npm/tone@latest"></script>
-     <style>
+
+    <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background: url('gif.gif') no-repeat center center fixed;
+            background-size: cover;
+            color: #FFA500; /* Orange */
+            font-family: 'Arial', sans-serif;
+            text-align: center;
             margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            padding: 50px;
         }
 
         h1 {
             font-size: 2em;
-            color: #333;
-            margin-bottom: 20px;
+            letter-spacing: 4px;
         }
 
         input[type="file"] {
-            margin-bottom: 20px;
+            margin-top: 20px;
             padding: 10px;
             background-color: #333;
             color: #FFF;
@@ -35,23 +32,19 @@
         }
 
         audio {
-            margin-bottom: 20px;
+            margin-top: 20px;
             width: 100%;
-            max-width: 300px;
         }
 
-        #downloadButton, button {
+        #downloadButton {
+            margin-top: 20px;
             padding: 10px;
-            background-color: #4CAF50;
+            background-color: #4CAF50; /* Vert */
             color: #FFF;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            display: none;
-        }
-
-        button {
-            margin-bottom: 10px;
+            display: none; /* Masquer le bouton par défaut */
         }
     </style>
 </head>
@@ -64,35 +57,58 @@
         Votre navigateur ne prend pas en charge l'élément audio.
     </audio>
 
+    <button id="downloadButton" onclick="downloadAudio()">Télécharger l'Audio Modifié</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/tone@14"></script>
     <script>
         var audioInput = document.getElementById("audioInput");
         var audio = document.getElementById("audio");
         var audioSource = document.getElementById("audioSource");
-        var player = new Tone.Player().toDestination(); // Création d'un lecteur audio Tone.js
+        var downloadButton = document.getElementById("downloadButton");
 
         audioInput.addEventListener("change", function (event) {
             var file = event.target.files[0];
-            var reader = new FileReader();
-
-            reader.onload = function (e) {
-                var audioBuffer = new Tone.Buffer(e.target.result, function () {
-                    player.buffer = audioBuffer;
-                    audioSource.src = URL.createObjectURL(file);
-                    audio.load();
-                });
-            };
-
-            reader.readAsArrayBuffer(file);
+            var objectURL = URL.createObjectURL(file);
+            
+            audioSource.src = objectURL;
+            audio.load();
         });
 
-        // Fonction pour changer la hauteur de ton avec Tone.js
-        function changePitch(shiftValue) {
-            player.playbackRate = Math.pow(2, shiftValue / 12);
+        var player = new Tone.Player().toDestination();
+
+        audio.addEventListener("play", function () {
+            player.load(audioSource.src, function () {
+                player.start();
+            });
+        });
+
+        audio.addEventListener("pause", function () {
+            player.stop();
+            showDownloadButton();
+        });
+
+        function showDownloadButton() {
+            downloadButton.style.display = "block";
         }
 
-        // Exemple pour changer la hauteur d'un ton vers le haut
-        var pitchShiftValue = 1; // Modifier cette valeur pour changer la hauteur
-        changePitch(pitchShiftValue);
+        function downloadAudio() {
+            player.toDestination().start();
+
+            Tone.Transport.start();
+
+            player.fadeOut = 0.1;
+            player.fadeIn = 0.01;
+
+            var modifiedAudioBlob = new Blob([player.buffer.toArray()], { type: "audio/mp3" });
+            var url = URL.createObjectURL(modifiedAudioBlob);
+
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "audio_modifie.mp3";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
     </script>
 </body>
 </html>
