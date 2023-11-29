@@ -94,12 +94,7 @@
 
         audio.addEventListener("pause", function () {
             player.stop();
-            showDownloadButton();
         });
-
-        function showDownloadButton() {
-            downloadButton.style.display = "block";
-        }
 
         function downloadAudio() {
             var mediaStream = new MediaStream([player.buffer.toDestination().toMaster()._context.destination.stream]); 
@@ -128,10 +123,14 @@
 
             mediaRecorder.start();
             
-            // Arrêtez l'enregistrement après 10 secondes, ajustez selon vos besoins
             setTimeout(() => {
                 mediaRecorder.stop();
-            }, 10000); // 10 secondes d'enregistrement
+                showDownloadButton();
+            }, 10000); // 10 secondes d'enregistrement, ajustez selon vos besoins
+        }
+
+        function showDownloadButton() {
+            downloadButton.style.display = "block";
         }
     </script>
 </body>
