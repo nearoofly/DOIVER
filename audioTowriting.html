@@ -120,11 +120,13 @@ a:hover {
             var synth = window.speechSynthesis;
 
             // Génération de l'audio et téléchargement au format MP3
+            var audioChunks = [];
             synth.cancel(); // Annuler les éventuelles synthèses en cours
+
             synth.speak(utterance);
-            
+
             utterance.onend = function () {
-                var blob = new Blob([new XMLSerializer().serializeToString(utterance)]);
+                var blob = new Blob(audioChunks, { type: 'audio/mpeg' });
                 var url = URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = url;
@@ -134,6 +136,10 @@ a:hover {
                 a.click();
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
+            };
+
+            utterance.onaudioprocess = function (event) {
+                audioChunks.push(event.inputBuffer.getChannelData(0));
             };
         }
     </script>
